@@ -2,8 +2,9 @@ import { HttpService } from '@nestjs/axios';
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { join } from 'path';
-import { catchError, concatMap, firstValueFrom, map, mergeMap, of, switchMap } from 'rxjs';
+import { catchError, firstValueFrom, map, of, switchMap } from 'rxjs';
 import { AxiosError, AxiosResponse } from 'axios';
+import { AreaMetadata, WeatherService } from 'src/weather/weather.service';
 import { neighborhoodRegionMap } from './constants';
 
 export interface Traffic {
@@ -21,8 +22,8 @@ export interface TrafficItem {
 }
 
 export interface CameraWithLoc extends CameraMetadata {
-    address: string,
-    area: string,
+    route: string,
+    neighborhood: string,
     region: string
 }
 
@@ -73,13 +74,14 @@ export class GeoService {
 
     constructor(
         private readonly httpService: HttpService,
-        private configService: ConfigService
+        private configService: ConfigService,
+        private weatherService: WeatherService
     ) {
         this.trafficEndpoint = join(configService.get("gov_api.url"), 'transport');
         this.googleEndpoint = join(configService.get("google_maps.url"), 'geocode/json');
     }
 
-    getTrafficData(datetime?: Date) {
+    getTrafficData(datetime?: string) {
         // datetime format: YYYY-MM-DD[T]HH:mm:ss (SGT)
         // const currentDT = new Date().toISOString().split('.')[0];
         const params = {};
@@ -96,29 +98,24 @@ export class GeoService {
         )
     }
 
-    async getCameraLocation() {
-        const cameras = this.getTrafficData().pipe(
-            mergeMap(traffics => traffics.map(data => data.cameras).slice(0, 1)),
-            concatMap(cams => {
-                return cams.map(async (cam) => {
-                    const { address, neighborhood } = await firstValueFrom(this.reverseGeocoding(cam.location));
-                    
-                    const data: CameraWithLoc = {
-                        ...cam,
-                        address: address,
-                        area: neighborhood,
-                        region: neighborhoodRegionMap[neighborhood]
-                    }
-                    return data;
-                });
-            }),
-            catchError((error: AxiosError) => {
-                this.logger.error(error.response.data);
-                throw error;
-            })
-        )
+    getCameraLocation(cameras: CameraMetadata[]) {
+        const promises = cameras.map(async (cam) => {
+            const geo = await firstValueFrom(this.reverseGeocoding(cam.location));
+            if (!geo.neighborhood) {
+                const areaMetadata = await this.weatherService.getAreaMetadata();
+                geo.neighborhood = this.computeMinDistance(cam.location, areaMetadata)[0].name;
+            }
+
+            const data: CameraWithLoc = {
+                ...cam,
+                route: geo.route,
+                neighborhood: geo.neighborhood,
+                region: neighborhoodRegionMap[geo.neighborhood]
+            }
+            return data;
+        })
         
-        return cameras;
+        return Promise.all(promises);
     }
 
     googleGeocoding(target: Coordinate) {
@@ -150,18 +147,32 @@ export class GeoService {
         return this.googleGeocoding(target).pipe(
             switchMap(res => {
                 const route = res.filter(r => r.types.includes('route'));
-                const neighborhood = res.filter(r => r.types.includes('neighborhood'));
+                const neighborhoods = res.filter(r => r.types.includes('neighborhood'))
+                    .map(n => 
+                        n.address_components.find(comp => comp.types.includes('neighborhood') && Object.keys(neighborhoodRegionMap).includes(comp.long_name))
+                    )
+                    .filter(n => n);
+                const rte = route.length > 0 ? route[0].formatted_address : null;
+                const neighborhood = neighborhoods.length > 0 ? neighborhoods[0].long_name : null;
 
-                const address = route.length > 0 ? route[0].formatted_address : null;
-                const neigbhoor = neighborhood.length > 0 ? neighborhood[0].address_components.find(comp => comp.types.includes('neighborhood')).long_name : null;
-
-                return of({ address: address, neighborhood: neigbhoor });
+                return of({ route: rte, neighborhood: neighborhood });
             }),
-            catchError((error: AxiosError) => {
+            catchError((error: any) => {
                 this.logger.error(error.response.data);
                 throw error;
             })
         )
+    }
+
+    computeMinDistance(target: Coordinate, areaMetadata: AreaMetadata[]) {
+        areaMetadata.forEach(area => {
+            area['distance'] = this.computeHaversine(target, area.label_location);
+        })
+        areaMetadata.sort(function(a, b) { 
+            return a['distance'] - b['distance'];
+        });
+        
+        return areaMetadata;
     }
 
     // Source: https://www.geodatasource.com/developers/javascript
