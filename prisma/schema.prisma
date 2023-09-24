@@ -11,9 +11,10 @@ generator client {
 }
 
 model Camera {
-  id    Int @id
-  latitude String  @unique
-  longitude String  @unique
+  id String @id
+  latitude Float @unique
+  longitude Float @unique
+  route String
+  neighborhood String
   region String
-  area String 
 }

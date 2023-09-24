@@ -1,10 +1,11 @@
 -- CreateTable
 CREATE TABLE "Camera" (
-    "id" INTEGER NOT NULL,
-    "latitude" TEXT NOT NULL,
-    "longitude" TEXT NOT NULL,
+    "id" TEXT NOT NULL,
+    "latitude" DOUBLE PRECISION NOT NULL,
+    "longitude" DOUBLE PRECISION NOT NULL,
+    "route" TEXT NOT NULL,
+    "neighborhood" TEXT NOT NULL,
     "region" TEXT NOT NULL,
-    "area" TEXT NOT NULL,
 
     CONSTRAINT "Camera_pkey" PRIMARY KEY ("id")
 );
