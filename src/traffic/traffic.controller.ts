@@ -51,6 +51,7 @@ export class TrafficController {
                     id: cam.camera_id,
                     latitude: cam.location.latitude,
                     longitude: cam.location.longitude,
+                    address: cam.address,
                     route: cam.route,
                     neighborhood: cam.neighborhood,
                     region: cam.region
@@ -62,6 +63,7 @@ export class TrafficController {
             
             const res = recordedCameras.map(cam => ({
                 id: cam.id,
+                address: cam.address,
                 route: cam.route,
                 neighborhood: cam.neighborhood,
                 region: cam.region,

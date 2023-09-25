@@ -22,6 +22,7 @@ export interface TrafficItem {
 }
 
 export interface CameraWithLoc extends CameraMetadata {
+    address: string,
     route: string,
     neighborhood: string,
     region: string
@@ -108,6 +109,7 @@ export class GeoService {
 
             const data: CameraWithLoc = {
                 ...cam,
+                address: geo.address,
                 route: geo.route,
                 neighborhood: geo.neighborhood,
                 region: neighborhoodRegionMap[geo.neighborhood]
@@ -145,23 +147,47 @@ export class GeoService {
 
     reverseGeocoding(target: Coordinate) {
         return this.googleGeocoding(target).pipe(
-            switchMap(res => {
-                const route = res.filter(r => r.types.includes('route'));
-                const neighborhoods = res.filter(r => r.types.includes('neighborhood'))
-                    .map(n => 
-                        n.address_components.find(comp => comp.types.includes('neighborhood') && Object.keys(neighborhoodRegionMap).includes(comp.long_name))
-                    )
-                    .filter(n => n);
-                const rte = route.length > 0 ? route[0].formatted_address : null;
-                const neighborhood = neighborhoods.length > 0 ? neighborhoods[0].long_name : null;
+            map(results => this.mapLocTypesToInfo(results)),
+            switchMap(typesMap => {
+                const { route, street_address, premise, neighborhood } = typesMap
 
-                return of({ route: rte, neighborhood: neighborhood });
+                const address = street_address ? street_address[0].formatted_address : premise ? premise[0].formatted_address : null;
+                const rte = route ? route[0].address_components[0].long_name : null;
+                const neighbh = neighborhood ? neighborhood[0].formatted_address : null;
+
+                return of({ address: address ?? rte, route: rte, neighborhood: neighbh });
             }),
             catchError((error: any) => {
                 this.logger.error(error.response.data);
                 throw error;
             })
         )
+    }
+
+    mapLocTypesToInfo (results: GoogleResponse['results']) {
+        const types = ['route', 'street_address', 'premise', 'neighborhood'];
+        const typesMap: { [type: string]: {
+            address_components: AddrComponents[],
+            formatted_address: string,
+            types: string[]
+        }[] } = results.reduce((mapping, res) => {
+            res.types.forEach(type => {
+                if (types.includes(type)) {
+                    if (type === 'neighborhood') {
+                        // Get recognized neighborhood names only to eliminate Google API returned different type of neighborhood value
+                        const recognizedNbh = res.address_components.find(comp => comp.types.includes('neighborhood') && Object.keys(neighborhoodRegionMap).includes(comp.long_name))
+                        if (!recognizedNbh) return
+
+                        res.formatted_address = recognizedNbh.long_name;
+                    }
+                    mapping[type] = mapping[type] || [];
+                    mapping[type].push(res);
+                }
+            });
+            return mapping;
+        }, {});
+
+        return typesMap;
     }
 
     computeMinDistance(target: Coordinate, areaMetadata: AreaMetadata[]) {
