@@ -152,7 +152,7 @@ export class GeoService {
                 const { route, street_address, premise, neighborhood } = typesMap
 
                 const address = street_address ? street_address[0].formatted_address : premise ? premise[0].formatted_address : null;
-                const rte = route ? route[0].address_components[0].long_name : null;
+                const rte = route ? route[0].formatted_address : null;
                 const neighbh = neighborhood ? neighborhood[0].formatted_address : null;
 
                 return of({ address: address ?? rte, route: rte, neighborhood: neighbh });
