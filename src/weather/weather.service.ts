@@ -2,7 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { join } from 'path';
 import { ConfigService } from '@nestjs/config';
-import { catchError, filter, firstValueFrom, map } from 'rxjs';
+import { catchError, firstValueFrom, map } from 'rxjs';
 import { AxiosError } from 'axios';
 import { APIStatus, Coordinate } from 'src/geo/geo.service';
 

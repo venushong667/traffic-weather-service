@@ -1,6 +1,5 @@
 import { Controller, Get, Query } from '@nestjs/common';
 import { Duration, WeatherService } from './weather.service';
-import { firstValueFrom } from 'rxjs';
 
 @Controller('weather')
 export class WeatherController {
