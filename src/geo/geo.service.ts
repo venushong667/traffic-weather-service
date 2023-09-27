@@ -4,8 +4,9 @@ import { ConfigService } from '@nestjs/config';
 import { join } from 'path';
 import { catchError, firstValueFrom, map, of, switchMap } from 'rxjs';
 import { AxiosError, AxiosResponse } from 'axios';
-import { AreaMetadata, WeatherService } from 'src/weather/weather.service';
+import { WeatherService } from 'src/weather/weather.service';
 import { neighborhoodRegionMap } from './constants';
+import { AreaMetadata } from 'src/weather/interface';
 
 export interface Traffic {
     items: TrafficItem[],

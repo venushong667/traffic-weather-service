@@ -4,36 +4,8 @@ import { join } from 'path';
 import { ConfigService } from '@nestjs/config';
 import { catchError, firstValueFrom, map } from 'rxjs';
 import { AxiosError } from 'axios';
-import { APIStatus, Coordinate } from 'src/geo/geo.service';
+import { AreaMetadata, Duration, ForecastType } from './interface';
 
-
-export type Duration = '2-hour' | '24-hour' | '4-day'
-
-export interface HourForecastData {
-    area_metadata: AreaMetadata[],
-    items: HourItem[],
-    api_info: APIStatus,
-}
-
-export interface AreaMetadata {
-    name: string,
-    label_location: Coordinate
-}
-
-export interface HourItem {
-    update_timestamp: string,
-    timestamp: string,
-    valid_period: {
-        start: string,
-        end: string
-    }
-    forecasts: Forecast[]
-}
-
-export interface Forecast {
-    area: string,
-    forecast: string
-}
 
 @Injectable()
 export class WeatherService {
@@ -47,7 +19,7 @@ export class WeatherService {
         this.weatherEndpoint = join(configService.get("gov_api.url"), 'environment');
     }
 
-    getWeatherData(duration: Duration = '2-hour', datetime?: string, date?: string) {
+    getWeatherData<T extends Duration>(duration: T, datetime?: string, date?: string) {
         // date format: YYYY-MM-DD[T]HH:mm:ss (SGT)
         // date format: YYYY-MM-DD
         const params = {};
@@ -57,7 +29,7 @@ export class WeatherService {
         if (date) {
             params['date'] = date;
         }
-        return this.httpService.get(join(this.weatherEndpoint, `${duration}-weather-forecast`), { params: params });
+        return this.httpService.get<ForecastType<T>>(join(this.weatherEndpoint, `${duration}-weather-forecast`), { params: params });
     }
 
     async getWeatherForecast(duration: Duration = '2-hour', datetime?: string, date?: string) {
@@ -74,7 +46,7 @@ export class WeatherService {
 
     async getAreaMetadata() {
         return await firstValueFrom(
-            this.getWeatherData().pipe(
+            this.getWeatherData('2-hour').pipe(
                 map(res => res.data.area_metadata as AreaMetadata[]),
                 catchError((error: AxiosError) => {
                     this.logger.error(error.response.data);
