@@ -1,7 +1,6 @@
-import { APIStatus, Coordinate } from "src/geo/geo.service"
+import { APIStatus, Coordinate } from "../geo/interfaces"
 
 // 2-hour
-
 export interface HourlyForecastData {
     area_metadata: AreaMetadata[]
     items: HourlyForecast[]
@@ -74,7 +73,6 @@ export interface FutureForecast {
 
 export interface DateForecast extends Observation {
     date: string
-    forecast: string
     timestamp: string
 }
 
@@ -84,5 +82,5 @@ export type Duration = '2-hour' | '24-hour' | '4-day'
 export type ForecastType<T> = 
     T extends "2-hour" ? HourlyForecastData :
     T extends "24-hour" ? DailyForecastData :
-    T extends "4-hour" ? FutureForecastData :
+    T extends "4-day" ? FutureForecastData :
     never;

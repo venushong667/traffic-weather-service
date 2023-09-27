@@ -1,8 +1,9 @@
 import { Controller, Get, Query } from '@nestjs/common';
 import { TrafficService } from './traffic.service';
-import { CameraMetadata, GeoService, ImageMetadata } from 'src/geo/geo.service';
+import { GeoService } from '../geo/geo.service';
 import { firstValueFrom, map, mergeMap } from 'rxjs';
 import { Camera, Prisma } from '@prisma/client';
+import { ImageMetadata, CameraMetadata } from 'src/geo/interfaces';
 
 export interface Traffic extends Omit<Camera, "latitude" | "longitude"> {
     image: {
@@ -60,7 +61,7 @@ export class TrafficController {
                 await this.trafficService.createCamera(cameraData);
                 recordedCameras = recordedCameras.concat(cameraData);
             }
-            
+
             const res = recordedCameras.map(cam => ({
                 id: cam.id,
                 address: cam.address,
@@ -72,7 +73,7 @@ export class TrafficController {
                     metadata: latestCameras[cam.id].image_metadata,
                 },
                 timestamp: latestCameras[cam.id].timestamp
-            } satisfies Traffic));
+            } satisfies Traffic as Traffic));
 
             return res;
         } catch (err) {

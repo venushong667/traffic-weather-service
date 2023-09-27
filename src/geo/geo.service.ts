@@ -4,69 +4,10 @@ import { ConfigService } from '@nestjs/config';
 import { join } from 'path';
 import { catchError, firstValueFrom, map, of, switchMap } from 'rxjs';
 import { AxiosError, AxiosResponse } from 'axios';
-import { WeatherService } from 'src/weather/weather.service';
+import { WeatherService } from '../weather/weather.service';
 import { neighborhoodRegionMap } from './constants';
-import { AreaMetadata } from 'src/weather/interfaces';
-
-export interface Traffic {
-    items: TrafficItem[],
-    api_info: APIStatus
-}
-
-export interface APIStatus {
-    status: string
-}
-
-export interface TrafficItem {
-    timestamp: string,
-    cameras: CameraMetadata[]
-}
-
-export interface CameraWithLoc extends CameraMetadata {
-    address: string,
-    route: string,
-    neighborhood: string,
-    region: string
-}
-
-export interface CameraMetadata {
-    timestamp: string,
-    image: string,
-    location: Coordinate,
-    camera_id: string,
-    image_metadata: ImageMetadata
-}
-
-export interface ImageMetadata {
-    height: number,
-    width: number,
-    md: string
-}
-
-export interface Coordinate {
-    longitude: number,
-    latitude: number
-}
-
-interface GoogleResponse {
-    plus_code: {
-        compound_code: string,
-        global_code: string
-    },
-    results: {
-        address_components: AddrComponents[],
-        formatted_address: string,
-        types: string[]
-    }[],
-    error_message?: string,
-    status: string
-}
-
-interface AddrComponents {
-    long_name: string,
-    short_name: string,
-    types: string[]
-}
+import { AreaMetadata } from '../weather/interfaces';
+import { Traffic, CameraMetadata, CameraWithLoc, Coordinate, GoogleResponse, AddrComponents } from './interfaces';
 
 @Injectable()
 export class GeoService {
