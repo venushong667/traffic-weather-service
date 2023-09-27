@@ -6,7 +6,7 @@ import { catchError, firstValueFrom, map, of, switchMap } from 'rxjs';
 import { AxiosError, AxiosResponse } from 'axios';
 import { WeatherService } from 'src/weather/weather.service';
 import { neighborhoodRegionMap } from './constants';
-import { AreaMetadata } from 'src/weather/interface';
+import { AreaMetadata } from 'src/weather/interfaces';
 
 export interface Traffic {
     items: TrafficItem[],

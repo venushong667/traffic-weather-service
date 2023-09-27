@@ -4,7 +4,7 @@ import { join } from 'path';
 import { ConfigService } from '@nestjs/config';
 import { catchError, firstValueFrom, map } from 'rxjs';
 import { AxiosError } from 'axios';
-import { AreaMetadata, Duration, ForecastType } from './interface';
+import { AreaMetadata, Duration, ForecastType } from './interfaces';
 
 
 @Injectable()
