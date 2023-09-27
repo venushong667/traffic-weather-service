@@ -76,8 +76,8 @@ export class TrafficController {
             } satisfies Traffic as Traffic));
 
             return res;
-        } catch (err) {
-            throw err;
+        } catch (error) {
+            throw error;
         }
     }
 }

@@ -77,7 +77,9 @@ export interface DateForecast extends Observation {
 }
 
 
-export type Duration = '2-hour' | '24-hour' | '4-day'
+export const duration = ["2-hour", "24-hour", "4-day"] as const;
+export type Duration = (typeof duration)[number];
+export const isDuration = (x: any): x is Duration => duration.includes(x);
 
 export type ForecastType<T> = 
     T extends "2-hour" ? HourlyForecastData :

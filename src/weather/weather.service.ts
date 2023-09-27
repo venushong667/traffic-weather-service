@@ -38,7 +38,7 @@ export class WeatherService {
                 map(res => res.data.items),
                 catchError((error: AxiosError) => {
                     this.logger.error(error.response.data);
-                    throw 'An error happened!';
+                    throw error;
                 })
             )
         )
@@ -50,7 +50,7 @@ export class WeatherService {
                 map(res => res.data.area_metadata as AreaMetadata[]),
                 catchError((error: AxiosError) => {
                     this.logger.error(error.response.data);
-                    throw 'An error happened!';
+                    throw error;
                 })
             )
         )

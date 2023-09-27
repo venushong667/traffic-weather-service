@@ -1,9 +1,9 @@
 import { HttpService } from '@nestjs/axios';
-import { Injectable, Logger } from '@nestjs/common';
+import { HttpException, Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { join } from 'path';
 import { catchError, firstValueFrom, map, of, switchMap } from 'rxjs';
-import { AxiosError, AxiosResponse } from 'axios';
+import { AxiosError } from 'axios';
 import { WeatherService } from '../weather/weather.service';
 import { neighborhoodRegionMap } from './constants';
 import { AreaMetadata } from '../weather/interfaces';
@@ -42,24 +42,28 @@ export class GeoService {
     }
 
     getCameraLocation(cameras: CameraMetadata[]) {
-        const promises = cameras.map(async (cam) => {
-            const geo = await firstValueFrom(this.reverseGeocoding(cam.location));
-            if (!geo.neighborhood) {
-                const areaMetadata = await this.weatherService.getAreaMetadata();
-                geo.neighborhood = this.computeMinDistance(cam.location, areaMetadata)[0].name;
-            }
-
-            const data: CameraWithLoc = {
-                ...cam,
-                address: geo.address,
-                route: geo.route,
-                neighborhood: geo.neighborhood,
-                region: neighborhoodRegionMap[geo.neighborhood]
-            }
-            return data;
-        })
-        
-        return Promise.all(promises);
+        try {
+            const promises = cameras.map(async (cam) => {
+                const geo = await firstValueFrom(this.reverseGeocoding(cam.location));
+                if (!geo.neighborhood) {
+                    const areaMetadata = await this.weatherService.getAreaMetadata();
+                    geo.neighborhood = this.computeMinDistance(cam.location, areaMetadata)[0].name;
+                }
+    
+                const data: CameraWithLoc = {
+                    ...cam,
+                    address: geo.address,
+                    route: geo.route,
+                    neighborhood: geo.neighborhood,
+                    region: neighborhoodRegionMap[geo.neighborhood]
+                }
+                return data;
+            })
+            
+            return Promise.all(promises);
+        } catch (error) {
+            throw error;
+        }
     }
 
     googleGeocoding(target: Coordinate) {
@@ -75,7 +79,7 @@ export class GeoService {
             map(res => {
                 // Google API still return 200 status code even error ex. access denied/bad request, hence manual error check
                 if (res.data.error_message) {
-                    throw new AxiosError(res.data.error_message, '500', null, null, { data: res.data.error_message, status: 500, statusText: res.data.status, headers: res.headers, config: res.config, request: res.request } satisfies AxiosResponse);
+                    throw new HttpException(res.data.error_message, res.status);
                 }
 
                 return res.data.results;
