@@ -20,6 +20,7 @@ export class WeatherService {
         this.weatherEndpoint = join(configService.get("gov_api.url"), 'environment');
     }
 
+    // Get weather data from Gov API
     getWeatherData<T extends Duration>(duration: T, datetime?: string, date?: string) {
         // date format: YYYY-MM-DD[T]HH:mm:ss (SGT)
         // date format: YYYY-MM-DD
@@ -33,6 +34,7 @@ export class WeatherService {
         return this.httpService.get<ForecastType<T>>(join(this.weatherEndpoint, `${duration}-weather-forecast`), { params: params });
     }
 
+    // Extract weather forecast data provided by Gov API
     async getWeatherForecast(duration: Duration = '2-hour', datetime?: string, date?: string) {
         return await firstValueFrom(
             this.getWeatherData(duration, datetime, date).pipe(
@@ -45,6 +47,7 @@ export class WeatherService {
         )
     }
 
+    // Extract area metadata provided by Gov API
     async getAreaMetadata() {
         return await firstValueFrom(
             this.getWeatherData('2-hour').pipe(

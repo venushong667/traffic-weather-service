@@ -35,7 +35,7 @@ describe('WeatherController', () => {
             const forecasts = [{
                 area: 'area1',
                 forecast: 'Windy'
-            } satisfies AreaForecast];
+            } satisfies AreaForecast as AreaForecast];
 
             const result = [{
                 update_timestamp: expect.any(String),

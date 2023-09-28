@@ -25,9 +25,9 @@ export class GeoService {
         this.googleEndpoint = join(configService.get("google_maps.url"), 'geocode/json');
     }
 
+    // Get traffic data from Gov API
     getTrafficData(datetime?: string) {
         // datetime format: YYYY-MM-DD[T]HH:mm:ss (SGT)
-        // const currentDT = new Date().toISOString().split('.')[0];
         const params = {};
         if (datetime) {
             params['date_time'] = datetime;
@@ -42,6 +42,7 @@ export class GeoService {
         )
     }
 
+    // Collect camera location by reverse geocoding on Google Map API
     getCameraLocation(cameras: CameraMetadata[]) {
         try {
             const promises = cameras.map(async (cam) => {
@@ -67,31 +68,7 @@ export class GeoService {
         }
     }
 
-    googleGeocoding(target: Coordinate) {
-        return this.httpService.get<GoogleResponse>(
-            this.googleEndpoint,
-            {
-                params: {
-                    key: this.configService.get('google_maps.apikey'),
-                    latlng: `${target.latitude},${target.longitude}`
-                }
-            }
-        ).pipe(
-            map(res => {
-                // Google API still return 200 status code even error ex. access denied/bad request, hence manual error check
-                if (res.data.error_message) {
-                    throw new HttpException(res.data.error_message, res.status);
-                }
-
-                return res.data.results;
-            }),
-            catchError((error: AxiosError) => {
-                this.logger.error(error.response.data);
-                throw error;
-            })
-        )
-    }
-
+    // Reverse geocoding on given coordinate using Google Map API
     reverseGeocoding(target: Coordinate) {
         return this.googleGeocoding(target).pipe(
             map(results => this.mapLocTypesToInfo(results)),
@@ -111,6 +88,33 @@ export class GeoService {
         )
     }
 
+    // Google geocoding API
+    googleGeocoding(target: Coordinate) {
+        return this.httpService.get<GoogleResponse>(
+            this.googleEndpoint,
+            {
+                params: {
+                    key: this.configService.get('google_maps.apikey'),
+                    latlng: `${target.latitude},${target.longitude}`
+                }
+            }
+        ).pipe(
+            map(res => {
+                // Google API return 200 status OK even error ex. access denied/bad request, hence perform manual error check
+                if (res.data.error_message) {
+                    throw new HttpException(res.data.error_message, res.status);
+                }
+
+                return res.data.results;
+            }),
+            catchError((error: AxiosError) => {
+                this.logger.error(error.response.data);
+                throw error;
+            })
+        )
+    }
+
+    // Google Map API response processor
     mapLocTypesToInfo (results: GoogleResponse['results']) {
         const types = ['route', 'street_address', 'premise', 'neighborhood'];
         const typesMap: { [type: string]: {
@@ -137,6 +141,7 @@ export class GeoService {
         return typesMap;
     }
 
+    // Find nearest area based on given target coordinate and area metadata from Gov Weather API
     computeMinDistance(target: Coordinate, areaMetadata: AreaMetadata[]) {
         areaMetadata.forEach(area => {
             area['distance'] = this.computeHaversine(target, area.label_location);

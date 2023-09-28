@@ -1,4 +1,4 @@
-import { Controller, Get, Query } from '@nestjs/common';
+import { Controller, Get, Logger, Query } from '@nestjs/common';
 import { Camera, Prisma } from '@prisma/client';
 import { firstValueFrom, map, mergeMap } from 'rxjs';
 import { CameraMetadata, ImageMetadata } from 'src/geo/interfaces';
@@ -16,6 +16,8 @@ export interface Traffic extends Omit<Camera, "latitude" | "longitude"> {
 
 @Controller('traffic')
 export class TrafficController {
+    private readonly logger = new Logger(TrafficController.name);
+
     constructor(
         private readonly trafficService: TrafficService,
         private readonly geoService: GeoService,
@@ -24,6 +26,7 @@ export class TrafficController {
     @Get()
     async findAll(@Query('date_time') datetime: string) {
         try {
+            // Get traffic data key by camera_id
             const latestCameras = await firstValueFrom(
                 this.geoService.getTrafficData(datetime).pipe(
                     mergeMap(traffics => traffics.map(data => data.cameras)),
@@ -39,15 +42,17 @@ export class TrafficController {
             );
             const cameraIds = Object.keys(latestCameras);
             
+            // Get previous stored camera metadata
             let recordedCameras = await this.trafficService.getCameras({
                 where: {
                     id: { in: cameraIds }
                 }
             });
-
-            if (cameraIds.length != recordedCameras.length) {
-                const recordedIds = recordedCameras.map(cam => cam.id);
-                const noRecordCameras = Object.values(latestCameras).filter(cam => !recordedIds.includes(cam.camera_id));
+            const recordedIds = recordedCameras.map(cam => cam.id);
+            
+            // Verify any unstored camera metadata exists
+            const noRecordCameras = Object.values(latestCameras).filter(cam => !recordedIds.includes(cam.camera_id));
+            if (noRecordCameras.length > 0) {
                 const camerasToCreate = await this.geoService.getCameraLocation(noRecordCameras);
                 const cameraData = camerasToCreate.map(cam => ({
                     id: cam.camera_id,
@@ -78,6 +83,7 @@ export class TrafficController {
 
             return res;
         } catch (error) {
+            this.logger.error(error);
             throw error;
         }
     }
