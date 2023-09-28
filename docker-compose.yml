@@ -10,7 +10,15 @@ services:
       - PGDATA=/var/lib/postgresql/data/pgdata
     volumes:
       - pgdata:/var/lib/postgresql/
-      
+    
+  traffic-weather:
+    image: traffic-weather
+    ports:
+      - "8080:8080"
+    environment:
+      - DATABASE_URL=postgresql://postgres:password@db:5432/traffic?schema=public
+      - GOOGLE_MAPS_API_KEY=${YOUR_GOOGLE_MAPS_API_KEY}
+    
 volumes:
   pgdata:
     driver: local
