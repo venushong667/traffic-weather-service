@@ -1,6 +1,7 @@
 import { BadRequestException, Controller, Get, Logger, Query } from '@nestjs/common';
-import { WeatherService } from './weather.service';
+
 import { Duration, isDuration } from './interfaces';
+import { WeatherService } from './weather.service';
 
 @Controller('weather')
 export class WeatherController {

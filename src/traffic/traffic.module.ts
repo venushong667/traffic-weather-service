@@ -1,9 +1,10 @@
-import { Module } from '@nestjs/common';
-import { TrafficService } from './traffic.service';
-import { TrafficController } from './traffic.controller';
 import { HttpModule } from '@nestjs/axios';
-import { PrismaService } from 'src/primsa.service';
+import { Module } from '@nestjs/common';
 import { GeoModule } from 'src/geo/geo.module';
+import { PrismaService } from 'src/primsa.service';
+
+import { TrafficController } from './traffic.controller';
+import { TrafficService } from './traffic.service';
 
 @Module({
     imports: [

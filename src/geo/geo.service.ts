@@ -1,13 +1,14 @@
 import { HttpService } from '@nestjs/axios';
 import { HttpException, Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { AxiosError } from 'axios';
 import { join } from 'path';
 import { catchError, firstValueFrom, map, of, switchMap } from 'rxjs';
-import { AxiosError } from 'axios';
+
+import { AreaMetadata } from '../weather/interfaces';
 import { WeatherService } from '../weather/weather.service';
 import { neighborhoodRegionMap } from './constants';
-import { AreaMetadata } from '../weather/interfaces';
-import { Traffic, CameraMetadata, CameraWithLoc, Coordinate, GoogleResponse, AddrComponents } from './interfaces';
+import { AddrComponents, CameraMetadata, CameraWithLoc, Coordinate, GoogleResponse, Traffic } from './interfaces';
 
 @Injectable()
 export class GeoService {

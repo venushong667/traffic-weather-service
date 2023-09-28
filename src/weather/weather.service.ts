@@ -1,9 +1,10 @@
-import { Injectable, Logger } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
-import { join } from 'path';
+import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { catchError, firstValueFrom, map } from 'rxjs';
 import { AxiosError } from 'axios';
+import { join } from 'path';
+import { catchError, firstValueFrom, map } from 'rxjs';
+
 import { AreaMetadata, Duration, ForecastType } from './interfaces';
 
 

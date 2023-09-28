@@ -1,11 +1,12 @@
 import { Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
+
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import configuration from './config/configuration';
+import { GeoModule } from './geo/geo.module';
 import { TrafficModule } from './traffic/traffic.module';
 import { WeatherModule } from './weather/weather.module';
-import { ConfigModule } from '@nestjs/config';
-import { GeoModule } from './geo/geo.module';
-import configuration from './config/configuration';
 
 @Module({
     imports: [

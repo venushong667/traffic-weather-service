@@ -1,9 +1,10 @@
 import { Controller, Get, Query } from '@nestjs/common';
-import { TrafficService } from './traffic.service';
-import { GeoService } from '../geo/geo.service';
-import { firstValueFrom, map, mergeMap } from 'rxjs';
 import { Camera, Prisma } from '@prisma/client';
-import { ImageMetadata, CameraMetadata } from 'src/geo/interfaces';
+import { firstValueFrom, map, mergeMap } from 'rxjs';
+import { CameraMetadata, ImageMetadata } from 'src/geo/interfaces';
+
+import { GeoService } from '../geo/geo.service';
+import { TrafficService } from './traffic.service';
 
 export interface Traffic extends Omit<Camera, "latitude" | "longitude"> {
     image: {

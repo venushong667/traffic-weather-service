@@ -1,9 +1,10 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { WeatherController } from './weather.controller';
-import { WeatherService } from './weather.service';
 import { HttpModule } from '@nestjs/axios';
 import { ConfigModule } from '@nestjs/config';
+import { Test, TestingModule } from '@nestjs/testing';
+
 import { AreaForecast, DailyForecast, DateForecast, FutureForecast, HourlyForecast, Period } from './interfaces';
+import { WeatherController } from './weather.controller';
+import { WeatherService } from './weather.service';
 
 describe('WeatherController', () => {
     let weatherController: WeatherController;

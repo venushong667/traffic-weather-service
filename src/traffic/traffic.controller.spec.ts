@@ -1,10 +1,11 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { Traffic, TrafficController } from './traffic.controller';
-import { TrafficService } from './traffic.service';
 import { ConfigModule } from '@nestjs/config';
-import { GeoService } from '../geo/geo.service';
+import { Test, TestingModule } from '@nestjs/testing';
 import { of } from 'rxjs';
 import { CameraMetadata, TrafficItem } from 'src/geo/interfaces';
+
+import { GeoService } from '../geo/geo.service';
+import { Traffic, TrafficController } from './traffic.controller';
+import { TrafficService } from './traffic.service';
 
 describe('TrafficController', () => {
     let trafficController: TrafficController;
