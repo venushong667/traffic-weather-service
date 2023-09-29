@@ -1,7 +1,11 @@
 # weather-traffic-nest
-## Description
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+## Caution
+
+- Ensure your PostgreSQL is up before the service. 
+If you have no local PostgreSQL server, please refer to the `docker-compose.yml` provided for easy db start up before starting any services.
+
+- If you're not going to run development server, build the [service](https://github.com/venushong667/traffic-weather-service#build-docker-image) and [ui](https://github.com/venushong667/traffic-weather-ui#build-docker-image) images then refer to [Google Map API key](https://github.com/venushong667/traffic-weather-service#google-maps-api) and [docker-compose setup](https://github.com/venushong667/traffic-weather-service#docker-setup) directly.
 
 ## Getting Started
 
@@ -24,7 +28,7 @@ npx prisma generate
 
 ### Running the app locally
 
-In order to run the server locally, please fill in your `google_maps.apikey` in `/config/configuration.ts` to prevent any issue. Guidance of getting API key is in later section.
+In order to run the server locally, please fill in your `google_maps.apikey` in `/config/configuration.ts` to prevent any issue. Please refer [this section](https://github.com/venushong667/traffic-weather-service#google-maps-api) for guidance.
 
 ```bash
 # development
@@ -44,6 +48,16 @@ $ npm run start:prod
 $ npm run test
 ```
 
+## Google Maps API
+
+This service is make use of Google Maps API to perform reverse geocoding. Hence the api key is required. (Don't worry it is free for this service usage.)
+
+Please follow the [steps](https://developers.google.com/maps/documentation/javascript/get-api-key) in `Create API keys` section to generate Geocoding API key.
+
+If there is any issue with the key generation, please let me know and I would provide the dummy key.
+
+## Docker Setup
+
 ### Build docker image
 
 In the project directory, run command
@@ -57,19 +71,11 @@ After image is built, please refer to the `docker-compose.yml` provided in this 
 
 ### Run Docker compose
 
-Make use the required environment variable such as `GOOGLE_MAP_API_KEY` is provided. Run command.
+Make sure the required environment variable such as `GOOGLE_MAP_API_KEY` is provided. Run following command.
 
 ```bash
 docker-compose up -d
 ```
-
-## Google Maps API
-
-This service is make use of Google Maps API to perform reverse geocoding. Hence the api key is required. (Don't worry it is free for this service usage.)
-
-Please follow the [steps](https://developers.google.com/maps/documentation/javascript/get-api-key) in `Create API keys` section to generate Geocoding API key.
-
-If there is any issue with the key generation, please let me know and I would provide the dummy key.
 
 
 ## Architecture 

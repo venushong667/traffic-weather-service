@@ -15,8 +15,6 @@ services:
     image: ui
     ports: 
       - "3000:3000"
-    environment:
-      - name=value
 
   traffic-weather:
     image: traffic-weather
