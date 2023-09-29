@@ -60,6 +60,8 @@ If there is any issue with the key generation, please let me know and I would pr
 
 ### Build docker image
 
+Make sure `./migrate-and-start.sh` is aligned in **LF** EOL instead of **CRLF**. It may cause script error running in container.
+
 ```bash
 docker build -t traffic-weather .
 ```
