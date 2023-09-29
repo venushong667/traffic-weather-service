@@ -11,6 +11,13 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/
     
+  ui:
+    image: ui
+    ports: 
+      - "3000:3000"
+    environment:
+      - name=value
+
   traffic-weather:
     image: traffic-weather
     ports:
@@ -18,7 +25,9 @@ services:
     environment:
       - DATABASE_URL=postgresql://postgres:password@db:5432/traffic?schema=public
       - GOOGLE_MAPS_API_KEY=${YOUR_GOOGLE_MAPS_API_KEY}
-    
+    depends_on:
+      - db
+
 volumes:
   pgdata:
     driver: local
