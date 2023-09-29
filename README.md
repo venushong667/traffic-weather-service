@@ -1,6 +1,6 @@
 # Traffic Weather Service
 
-## Caution
+## Cautions
 
 - Ensure your PostgreSQL is up before the service. 
 If you have no local PostgreSQL server, please refer to the `docker-compose.yml` provided for easy db start up before starting any services.
@@ -60,8 +60,6 @@ If there is any issue with the key generation, please let me know and I would pr
 
 ### Build docker image
 
-In the project directory, run command
-
 ```bash
 docker build -t traffic-weather .
 ```
@@ -76,7 +74,6 @@ Make sure the required environment variable such as `GOOGLE_MAP_API_KEY` is prov
 ```bash
 docker-compose up -d
 ```
-
 
 ## Architecture 
 
