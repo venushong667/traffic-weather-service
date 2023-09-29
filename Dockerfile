@@ -24,4 +24,4 @@ EXPOSE 8080
 ENV PORT 8080
 
 # Start the server using the production build
-CMD [ "node", "dist/main.js" ]
+CMD [ "./migrate-and-start.sh" ]
